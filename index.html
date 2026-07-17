@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Citaro PRO Assessment Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto" id="app">
+        <header class="flex justify-between items-center mb-8 border-b border-slate-800 pb-4">
+            <div>
+                <h1 class="text-2xl font-bold text-emerald-400">Citaro PRO Training Suite V3</h1>
+                <p class="text-xs text-slate-500" id="session-info">Valutazione FORDEC in corso...</p>
+            </div>
+            <div id="qr-area" class="bg-white p-1 rounded"></div>
+        </header>
+
+        <div id="game-ui" class="bg-slate-900 p-6 rounded-2xl border border-slate-700 shadow-2xl">
+            <div id="view-scenario">
+                <h2 id="scenario-title" class="text-xl font-bold mb-2">Caricamento...</h2>
+                <p id="scenario-facts" class="text-slate-300 mb-6 text-sm"></p>
+                <div class="mb-6">
+                    <button onclick="playDiagnosticSound()" class="bg-emerald-900 px-4 py-2 rounded border border-emerald-500 text-emerald-300 text-sm">
+                        🔊 Analizza Segnale Acustico
+                    </button>
+                </div>
+                <div id="options" class="grid gap-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        const scenarios = [
+            { id: 1, name: "Pressione Olio", facts: "Spia rossa, rumore metallico, galleria.", correct: "Fermo immediato", feedback: "Pressione olio 0: Rischio distruzione motore immediato.", points: 20 },
+            { id: 2, name: "Pedana Disabili", facts: "Pedana bloccata, passeggeri a bordo.", correct: "Assistenza", feedback: "Sblocco manuale richiesto con brugola.", points: 10 },
+            { id: 3, name: "Filtro Abitacolo", facts: "Odore muffa, comfort ridotto.", correct: "Segnala a fine turno", feedback: "Anomalia minore: servizio garantito.", points: 5 },
+            { id: 4, name: "Anomalia ECAS", facts: "Bus inclinato, nessuna spia rossa.", correct: "Reset Bus Sleep", feedback: "Valvola livellamento bloccata, reset risolutivo.", points: 15 },
+            { id: 5, name: "AdBlue", facts: "Spia gialla emissioni.", correct: "Proseguire", feedback: "L'SCR permette di finire il turno.", points: 10 },
+            { id: 6, name: "Scatola Sterzo", facts: "Gioco volante eccessivo.", correct: "Fermo immediato", feedback: "Rischio perdita controllo sterzo.", points: 20 },
+            { id: 7, name: "Refrigerante", facts: "Livello minimo acqua.", correct: "Fermo immediato", feedback: "Rischio surriscaldamento testata.", points: 20 },
+            { id: 8, name: "Porte", facts: "Porta rimbalza, ostacolo rimosso.", correct: "Proseguire", feedback: "Errore temporaneo sensore risolto.", points: 5 },
+            { id: 9, name: "Freni", facts: "Fischio stridente in frenata.", correct: "Segnala a fine turno", feedback: "Usura pastiglie, non critico.", points: 5 },
+            { id: 10, name: "Alternatore", facts: "Spia batteria rossa.", correct: "Fermo immediato", feedback: "Rischio spegnimento totale sistemi.", points: 20 }
+        ];
+
+        let index = 0, score = 0, results = [];
+        
+        function shuffle(array) { return array.sort(() => Math.random() - 0.5); }
+        let currentScenarios = shuffle([...scenarios]);
+
+        function render() {
+            if(index >= currentScenarios.length) {
+                let html = `<h2 class="text-2xl font-bold text-emerald-400">Valutazione Completata</h2>`;
+                html += `<p class="mt-4">Punteggio Totale: ${score}/${scenarios.reduce((a,b)=>a+b.points,0)}</p><ul class="mt-4 space-y-2">`;
+                results.forEach(r => html += `<li class="p-2 bg-slate-800 rounded text-xs ${r.ok ? 'border-l-4 border-emerald-500' : 'border-l-4 border-red-500'}">${r.name}: ${r.feedback}</li>`);
+                html += `</ul><button onclick="location.reload()" class="mt-6 w-full bg-emerald-600 py-3 rounded">Nuovo Test</button>`;
+                document.getElementById('game-ui').innerHTML = html;
+                return;
+            }
+            const s = currentScenarios[index];
+            document.getElementById('scenario-title').innerText = s.name;
+            document.getElementById('scenario-facts').innerText = s.facts;
+            const container = document.getElementById('options');
+            let opts = shuffle(["Fermo immediato", "Assistenza", "Segnala a fine turno", "Proseguire", "Reset Bus Sleep"]);
+            container.innerHTML = opts.map(o => `<button onclick="check('${o}')" class="p-3 bg-slate-800 hover:bg-slate-700 rounded border border-slate-600">${o}</button>`).join('');
+        }
+
+        function check(choice) {
+            const s = currentScenarios[index];
+            const ok = choice === s.correct;
+            if(ok) score += s.points;
+            results.push({ name: s.name, ok, feedback: s.feedback });
+            index++;
+            render();
+        }
+
+        function playDiagnosticSound() {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            osc.frequency.setValueAtTime(100 + (Math.random()*500), audioCtx.currentTime);
+            osc.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.5);
+        }
+
+        new QRCode(document.getElementById("qr-area"), window.location.href);
+        render();
+    </script>
+</body>
+</html>
