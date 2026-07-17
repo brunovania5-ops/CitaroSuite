@@ -2,38 +2,43 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>Citaro PRO - Diagnostica Certificata V4</title>
+    <title>Citaro PRO - Assessment FORDEC</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8">
     <div class="max-w-4xl mx-auto" id="app">
         <header class="mb-8 border-b border-slate-800 pb-4">
-            <h1 class="text-2xl font-bold text-emerald-400">Citaro PRO Training Suite V4</h1>
+            <h1 class="text-2xl font-bold text-emerald-400">Valutazione FORDEC - Citaro PRO</h1>
         </header>
 
         <div id="game-ui" class="bg-slate-900 p-6 rounded-2xl border border-slate-700 shadow-2xl">
-            <h2 id="scenario-title" class="text-xl font-bold mb-2">Caricamento...</h2>
-            <p id="scenario-facts" class="text-slate-300 mb-6 text-sm"></p>
+            <div id="test-content">
+                <h2 id="scenario-title" class="text-xl font-bold mb-2">Caricamento...</h2>
+                <p id="scenario-facts" class="text-slate-300 mb-6 text-sm"></p>
+                <div id="audio-container" class="mb-6 min-h-[50px]"></div>
+                <div id="options" class="grid gap-3"></div>
+            </div>
             
-            <div id="audio-container" class="mb-6 min-h-[60px]"></div>
-            
-            <div id="options" class="grid gap-3"></div>
+            <div id="result-view" class="hidden">
+                <h2 class="text-2xl font-bold text-emerald-400 mb-4">Certificazione FORDEC</h2>
+                <div id="final-stats" class="space-y-4"></div>
+                <button onclick="location.reload()" class="mt-6 w-full bg-emerald-600 py-3 rounded font-bold hover:bg-emerald-500">Ricomincia Test</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // MAPPATURA DEFINITIVA E RIGOROSA
         const scenarios = [
-            { id: 1, name: "Pressione Olio", facts: "Spia rossa, rumore metallico.", sound: "motore_rotto.mp3.mp3" },
-            { id: 2, name: "Cinghia Servizi", facts: "Fischio acuto, spia batteria.", sound: "cinghia_slitta.mp3.mp3" },
-            { id: 3, name: "Scatola Sterzo", facts: "Gioco volante eccessivo.", sound: "scatola_sterzo.mp3.mp3" },
-            { id: 4, name: "Freni (Usura)", facts: "Fischio stridente in frenata.", sound: "freni_fischio.wav.wav" },
-            { id: 5, name: "Freni (Sfiato)", facts: "Sifilo d'aria continuo.", sound: "freni_aria.mp3.mp3" },
-            { id: 6, name: "Liquido Refrigerante", facts: "Livello minimo acqua.", sound: null },
-            { id: 7, name: "Anomalia AdBlue", facts: "Spia gialla emissioni.", sound: null }
+            { id: 1, name: "Pressione Olio", facts: "Spia rossa motore accesa.", correct: "Fermo", feedback: "F: Pressione 0. D: Fermo immediato.", sound: "motore_rotto.mp3.mp3" },
+            { id: 2, name: "Cinghia Servizi", facts: "Fischio acuto, spia batteria.", correct: "Fermo", feedback: "F: Rischio pompa acqua. D: Fermo immediato.", sound: "cinghia_slitta.mp3.mp3" },
+            { id: 3, name: "Scatola Sterzo", facts: "Gioco volante eccessivo.", correct: "Fermo", feedback: "F: Rischio perdita sterzo. D: Fermo immediato.", sound: "scatola_sterzo.mp3.mp3" },
+            { id: 4, name: "Freni (Usura)", facts: "Fischio stridente in frenata.", correct: "Segnala", feedback: "F: Pastiglie usurate. D: Segnala fine turno.", sound: "freni_fischio.wav.wav" },
+            { id: 5, name: "Freni (Sfiato)", facts: "Sifilo d'aria continuo.", correct: "Assistenza", feedback: "F: Perdita pneumatica. D: Assistenza.", sound: "freni_aria.mp3.mp3" },
+            { id: 6, name: "Pedana Disabili", facts: "Pedana bloccata, passeggero a bordo.", correct: "Assistenza", feedback: "F: Pedana non rientra. D: Assistenza.", sound: null },
+            { id: 7, name: "Filtro Abitacolo", facts: "Odore muffa, comfort ridotto.", correct: "Segnala", feedback: "F: Comfort. D: Segnala fine turno.", sound: null }
         ];
 
-        let index = 0;
+        let index = 0, score = 0, results = [];
         const audioPlayer = new Audio();
 
         function playScenarioSound(fileName) {
@@ -42,27 +47,42 @@
         }
 
         function render() {
+            if (index >= scenarios.length) {
+                showResults();
+                return;
+            }
             const s = scenarios[index];
-            document.getElementById('scenario-title').innerText = s.name;
+            document.getElementById('scenario-title').innerText = `Scenario ${index + 1}: ${s.name}`;
             document.getElementById('scenario-facts').innerText = s.facts;
 
             const audioContainer = document.getElementById('audio-container');
-            if (s.sound) {
-                audioContainer.innerHTML = `
-                    <button onclick="playScenarioSound('${s.sound}')" class="bg-emerald-900 px-4 py-2 rounded border border-emerald-500 text-emerald-300 text-sm hover:bg-emerald-800">
-                        🔊 Ascolta Segnale Diagnostico
-                    </button>`;
-            } else {
-                audioContainer.innerHTML = `<p class="text-xs text-slate-600 italic">Nessun segnale acustico disponibile per questa anomalia.</p>`;
-            }
+            audioContainer.innerHTML = s.sound ? 
+                `<button onclick="playScenarioSound('${s.sound}')" class="bg-emerald-900 px-4 py-2 rounded border border-emerald-500 text-emerald-300 text-sm hover:bg-emerald-800">🔊 Ascolta Segnale</button>` 
+                : `<p class="text-xs text-slate-600 italic">Nessun segnale acustico per questo scenario.</p>`;
 
             document.getElementById('options').innerHTML = ["Fermo", "Assistenza", "Segnala"].map(o => 
-                `<button onclick="nextScenario()" class="p-3 bg-slate-800 hover:bg-slate-700 rounded border border-slate-600">${o}</button>`).join('');
+                `<button onclick="submit('${o}')" class="p-3 bg-slate-800 hover:bg-slate-700 rounded border border-slate-600 transition">${o}</button>`).join('');
         }
 
-        function nextScenario() {
-            index = (index + 1) % scenarios.length;
+        function submit(choice) {
+            const s = scenarios[index];
+            const isCorrect = choice === s.correct;
+            if(isCorrect) score += 1;
+            results.push({ name: s.name, choice, correct: s.correct, feedback: s.feedback, ok: isCorrect });
+            index++;
             render();
+        }
+
+        function showResults() {
+            document.getElementById('test-content').classList.add('hidden');
+            document.getElementById('result-view').classList.remove('hidden');
+            let html = `<p class="mb-4 font-bold text-lg">Punteggio: ${score}/${scenarios.length}</p><ul class="space-y-3">`;
+            results.forEach(r => {
+                html += `<li class="p-3 rounded border-l-4 ${r.ok ? 'bg-emerald-900/30 border-emerald-500' : 'bg-red-900/30 border-red-500'}">
+                    <span class="font-bold">${r.name}</span><br><span class="text-xs">${r.feedback}</span>
+                </li>`;
+            });
+            document.getElementById('final-stats').innerHTML = html + "</ul>";
         }
 
         render();
@@ -71,9 +91,7 @@
 </html>
 ```eof
 
-### Cosa ho fatto:
-1.  **Associazione 1:1:** Ho creato un array `scenarios` dove ogni oggetto contiene solo l'audio che mi hai confermato essere corretto.
-2.  **Rimozione ambiguità:** Se `sound` è `null` (come per AdBlue o Refrigerante), il pulsante non appare. Non ci sarà più alcun rischio di associare erroneamente un suono.
-3.  **Freni separati:** Ora hai due scenari distinti per i freni (`Freni Usura` e `Freni Sfiato`), ognuno con il suo file corretto.
-
-**Carica questo file su GitHub.** Ora il percorso diagnostico è scientificamente corretto. Se senti ancora un suono sbagliato, significa che c'è un errore nei file che hai caricato (es. il file `freni_aria.mp3.mp3` contiene in realtà un suono diverso). Se dovesse succedere, basterà rinominare il file corretto su GitHub col nome che il codice richiede.
+### Cosa fare ora:
+1. **Carica il file:** Sostituisci il contenuto del tuo `index.html` su GitHub.
+2. **Testa il percorso:** Clicca le risposte e osserva come il sistema avanza correttamente verso il report finale.
+3. **Verifica il report:** A fine test avrai una schermata riassuntiva. Se il punteggio o la conformità FORDEC non ti soddisfano in uno scenario, dimmi pure: *"Nello scenario Pressione Olio, la risposta corretta deve essere X"* e lo sistemeremo all'istante.
