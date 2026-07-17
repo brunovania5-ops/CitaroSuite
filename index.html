@@ -1,84 +1,92 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<title>Citaro PRO Training Suite</title>
-<script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <title>Citaro PRO - Assessment FORDEC</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8">
-<div class="max-w-4xl mx-auto">
-<div id="game-ui" class="bg-slate-900 p-6 rounded-2xl border border-slate-700 shadow-2xl">
-<div id="test-content">
-<h2 id="scenario-title" class="text-xl font-bold mb-2">Caricamento...</h2>
-<p id="scenario-facts" class="text-slate-300 mb-6 text-sm"></p>
-<div id="audio-container" class="mb-6 h-12"></div>
-<div id="options" class="grid gap-3"></div>
-</div>
-<div id="result-view" class="hidden">
-<h2 class="text-2xl font-bold text-emerald-400 mb-4">Certificazione FORDEC</h2>
-<div id="final-stats"></div>
-<button onclick="window.location.reload()" class="mt-6 w-full bg-emerald-600 py-3 rounded font-bold hover:bg-emerald-500">Ricomincia Test</button>
-</div>
-</div>
-</div>
-<script>
-const scenarios = [
-{ name: "Pressione Olio", facts: "Spia rossa motore accesa.", correct: "Fermo", feedback: "Pressione 0: rischio grippaggio motore.", sound: "motore_rotto.mp3.mp3" },
-{ name: "Cinghia Servizi", facts: "Fischio acuto, spia batteria.", correct: "Fermo", feedback: "Rischio perdita sterzo/pompa acqua.", sound: "cinghia_slitta.mp3.mp3" },
-{ name: "Scatola Sterzo", facts: "Gioco volante eccessivo.", correct: "Fermo", feedback: "Rischio perdita controllo sterzo.", sound: "scatola_sterzo.mp3.mp3" },
-{ name: "Freni (Usura)", facts: "Fischio stridente in frenata.", correct: "Segnala", feedback: "Pastiglie usurate, non critico.", sound: "freni_fischio.wav.wav" },
-{ name: "Freni (Sfiato)", facts: "Sifilo d'aria continuo.", correct: "Assistenza", feedback: "Perdita circuito pneumatico.", sound: "freni_aria.mp3.mp3" },
-{ name: "Porta Bloccata", facts: "Porta passeggeri non chiude.", correct: "Assistenza", feedback: "Ostacolo o sensore.", sound: "bus_generico.wav.wav" },
-{ name: "Pedana Disabili", facts: "Pedana non rientra.", correct: "Assistenza", feedback: "Blocco meccanico.", sound: "bus_generico.wav.wav" },
-{ name: "Tergicristallo", facts: "Spazzola lato guida che salta.", correct: "Segnala", feedback: "Visibilità ridotta: intervento fine turno.", sound: null },
-{ name: "Liquido Lavavetri", facts: "Spia livello basso accesa.", correct: "Segnala", feedback: "Rabbocco necessario.", sound: null },
-{ name: "Climatizzatore", facts: "Comfort ridotto, aria calda.", correct: "Segnala", feedback: "Anomalia comfort: servizio garantito.", sound: null },
-{ name: "Filtro Abitacolo", facts: "Odore di muffa in abitacolo.", correct: "Segnala", feedback: "Sanificazione necessaria.", sound: null }
-];
-let index = 0, score = 0, results = [];
-let player = new Audio();
-function playScenarioSound(fileName) {
-player.pause();
-player.currentTime = 0;
-player.src = fileName;
-player.play();
-}
-function render() {
-if (index >= scenarios.length) { showResults(); return; }
-player.pause();
-player.currentTime = 0;
-const s = scenarios[index];
-document.getElementById('scenario-title').innerText = `Scenario ${index + 1}: ${s.name}`;
-document.getElementById('scenario-facts').innerText = s.facts;
-const audioContainer = document.getElementById('audio-container');
-audioContainer.innerHTML = s.sound ? 
-`<button onclick="playScenarioSound('${s.sound}')" class="bg-emerald-900 px-4 py-2 rounded border border-emerald-500 text-emerald-300 text-sm hover:bg-emerald-800">🔊 Ascolta Segnale</button>` 
-: `<p class="text-xs text-slate-600 italic">Nessun segnale acustico diagnostico.</p>`;
-document.getElementById('options').innerHTML = ["Fermo", "Assistenza", "Segnala"].map(o => 
-`<button onclick="submit('${o}')" class="p-3 bg-slate-800 hover:bg-slate-700 rounded border border-slate-600 transition">${o}</button>`).join('');
-}
-function submit(choice) {
-player.pause();
-player.currentTime = 0;
-const s = scenarios[index];
-const isCorrect = choice === s.correct;
-if(isCorrect) score += 1;
-results.push({ name: s.name, feedback: s.feedback, ok: isCorrect });
-index++;
-render();
-}
-function showResults() {
-document.getElementById('test-content').classList.add('hidden');
-document.getElementById('result-view').classList.remove('hidden');
-let html = `<p class="mb-4 font-bold text-lg">Punteggio Totale: ${score}/${scenarios.length}</p><ul class="space-y-3">`;
-results.forEach(r => {
-html += `<li class="p-3 rounded border-l-4 ${r.ok ? 'bg-emerald-900/30 border-emerald-500' : 'bg-red-900/30 border-red-500'}">
-<span class="font-bold">${r.name}</span><br><span class="text-xs">${r.feedback}</span>
-</li>`;
-});
-document.getElementById('final-stats').innerHTML = html + "</ul>";
-}
-render();
-</script>
+    <div class="max-w-4xl mx-auto">
+        <div id="game-ui" class="bg-slate-900 p-6 rounded-2xl border border-slate-700 shadow-2xl">
+            <div id="test-content">
+                <h2 id="scenario-title" class="text-xl font-bold mb-2">Caricamento...</h2>
+                <p id="scenario-facts" class="text-slate-300 mb-6 text-sm"></p>
+                <div id="audio-container" class="mb-6 h-12"></div>
+                <div id="options" class="grid gap-3"></div>
+            </div>
+            <div id="result-view" class="hidden">
+                <h2 class="text-2xl font-bold text-emerald-400 mb-4">Certificazione FORDEC</h2>
+                <div id="final-stats"></div>
+                <button onclick="window.location.reload()" class="mt-6 w-full bg-emerald-600 py-3 rounded font-bold hover:bg-emerald-500">Ricomincia Test</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const scenarios = [
+            { name: "Pressione Olio", facts: "Spia rossa, rumore metallico.", correct: "Fermo", feedback: "Pressione 0: rischio grippaggio motore.", sound: "motore_rotto.mp3.mp3" },
+            { name: "Cinghia Servizi", facts: "Fischio acuto, spia batteria.", correct: "Fermo", feedback: "Rischio perdita sterzo/pompa acqua.", sound: "cinghia_slitta.mp3.mp3" },
+            { name: "Scatola Sterzo", facts: "Gioco volante eccessivo.", correct: "Fermo", feedback: "Rischio perdita controllo sterzo.", sound: "scatola_sterzo.mp3.mp3" },
+            { name: "Freni (Usura)", facts: "Fischio stridente in frenata.", correct: "Segnala", feedback: "Pastiglie usurate, non critico.", sound: "freni_fischio.wav.wav" },
+            { name: "Freni (Sfiato)", facts: "Sifilo d'aria continuo.", correct: "Assistenza", feedback: "Perdita circuito pneumatico.", sound: "freni_aria.mp3.mp3" },
+            { name: "Porta Bloccata", facts: "Porta passeggeri non chiude.", correct: "Assistenza", feedback: "Ostacolo o sensore.", sound: "bus_generico.wav.wav" },
+            { name: "Tergicristallo", facts: "Spazzola lato guida che salta.", correct: "Segnala", feedback: "Visibilità ridotta: intervento fine turno.", sound: null },
+            { name: "Liquido Lavavetri", facts: "Spia livello basso accesa.", correct: "Segnala", feedback: "Rabbocco necessario.", sound: null },
+            { name: "Climatizzatore", facts: "Comfort ridotto, aria calda.", correct: "Segnala", feedback: "Anomalia comfort: servizio garantito.", sound: null },
+            { name: "Filtro Abitacolo", facts: "Odore di muffa in abitacolo.", correct: "Segnala", feedback: "Sanificazione necessaria.", sound: null }
+        ];
+
+        let index = 0, score = 0, results = [];
+        let player = new Audio();
+
+        function playScenarioSound(fileName) {
+            player.pause(); player.currentTime = 0;
+            player.src = fileName; player.play();
+        }
+
+        function render() {
+            if (index >= scenarios.length) { showResults(); return; }
+            player.pause(); player.currentTime = 0;
+            const s = scenarios[index];
+            document.getElementById('scenario-title').innerText = `Scenario ${index + 1}: ${s.name}`;
+            document.getElementById('scenario-facts').innerText = s.facts;
+
+            const audioContainer = document.getElementById('audio-container');
+            audioContainer.innerHTML = s.sound ? 
+                `<button onclick="playScenarioSound('${s.sound}')" class="bg-emerald-900 px-4 py-2 rounded border border-emerald-500 text-emerald-300 text-sm hover:bg-emerald-800">🔊 Ascolta Segnale</button>` 
+                : `<p class="text-xs text-slate-600 italic">Nessun segnale acustico diagnostico.</p>`;
+
+            document.getElementById('options').innerHTML = ["Fermo", "Assistenza", "Segnala"].map(o => 
+                `<button onclick="submit('${o}')" class="p-3 bg-slate-800 hover:bg-slate-700 rounded border border-slate-600 transition">${o}</button>`).join('');
+        }
+
+        function submit(choice) {
+            player.pause(); player.currentTime = 0;
+            const s = scenarios[index];
+            const isCorrect = choice === s.correct;
+            if(isCorrect) score += 1;
+            results.push({ name: s.name, choice: choice, correct: s.correct, feedback: s.feedback, ok: isCorrect });
+            index++;
+            render();
+        }
+
+        function showResults() {
+            document.getElementById('test-content').classList.add('hidden');
+            document.getElementById('result-view').classList.remove('hidden');
+            let html = `<p class="mb-4 font-bold text-lg">Punteggio Totale: ${score}/${scenarios.length}</p><ul class="space-y-4">`;
+            results.forEach(r => {
+                html += `<li class="p-4 rounded border-l-4 ${r.ok ? 'bg-emerald-900/30 border-emerald-500' : 'bg-red-900/30 border-red-500'}">
+                    <div class="font-bold">${r.name}</div>
+                    <div class="text-xs mt-1">
+                        ${r.ok ? '' : `<span class="text-red-300">Scelta: ${r.choice}</span><br>`}
+                        <span class="text-emerald-300">Procedura Corretta: ${r.correct}</span><br>
+                        <span class="opacity-70">${r.feedback}</span>
+                    </div>
+                </li>`;
+            });
+            document.getElementById('final-stats').innerHTML = html + "</ul>";
+        }
+        render();
+    </script>
 </body>
 </html>
