@@ -2,86 +2,74 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>Citaro PRO - Training Suite V3</title>
+    <title>Citaro PRO Training Suite V3 - Audio Debugged</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8">
     <div class="max-w-4xl mx-auto" id="app">
         <header class="flex justify-between items-center mb-8 border-b border-slate-800 pb-4">
-            <div>
-                <h1 class="text-2xl font-bold text-emerald-400">Citaro PRO Training Suite V3</h1>
-                <p class="text-xs text-slate-500">Valutazione FORDEC & Diagnostica</p>
-            </div>
+            <h1 class="text-2xl font-bold text-emerald-400">Citaro PRO Training Suite V3</h1>
             <div id="qr-area" class="bg-white p-1 rounded"></div>
         </header>
 
         <div id="game-ui" class="bg-slate-900 p-6 rounded-2xl border border-slate-700 shadow-2xl">
-            <div id="view-scenario">
-                <h2 id="scenario-title" class="text-xl font-bold mb-2">Caricamento...</h2>
-                <p id="scenario-facts" class="text-slate-300 mb-6 text-sm"></p>
-                <div class="mb-6">
-                    <button onclick="playScenarioSound()" class="bg-emerald-900 px-4 py-2 rounded border border-emerald-500 text-emerald-300 text-sm">
-                        🔊 Analizza Segnale Acustico
-                    </button>
-                    <audio id="audio-player"></audio>
+            <h2 id="scenario-title" class="text-xl font-bold mb-2">Caricamento...</h2>
+            <p id="scenario-facts" class="text-slate-300 mb-6 text-sm"></p>
+            
+            <div class="mb-6 space-y-4">
+                <button onclick="playScenarioSound()" class="bg-emerald-900 px-4 py-2 rounded border border-emerald-500 text-emerald-300 text-sm hover:bg-emerald-800">
+                    🔊 Analizza Segnale Acustico
+                </button>
+                <!-- Pannello Diagnostica -->
+                <div id="debug-panel" class="text-xs p-3 bg-slate-800 border border-slate-700 rounded text-slate-400 font-mono">
+                    Stato: In attesa di input...
                 </div>
-                <div id="options" class="grid gap-3"></div>
+                <audio id="audio-player"></audio>
             </div>
+            <div id="options" class="grid gap-3"></div>
         </div>
     </div>
 
     <script>
         const scenarios = [
-            { id: 1, name: "Pressione Olio", facts: "Spia rossa, rumore metallico in galleria.", correct: "Fermo immediato", feedback: "Pressione olio 0: Rischio distruzione motore immediato.", points: 20, sound: "motore_rotto.mp3.mp3" },
-            { id: 2, name: "Pedana Disabili", facts: "Pedana bloccata, passeggeri a bordo.", correct: "Assistenza", feedback: "Sblocco manuale richiesto con brugola.", points: 10, sound: "bus_generico.wav.wav" },
-            { id: 3, name: "Filtro Abitacolo", facts: "Odore muffa, comfort ridotto.", correct: "Segnala a fine turno", feedback: "Anomalia minore: servizio garantito.", points: 5, sound: "bus_generico.wav.wav" },
-            { id: 4, name: "Anomalia ECAS", facts: "Bus inclinato, nessuna spia rossa.", correct: "Reset Bus Sleep", feedback: "Valvola livellamento bloccata, reset risolutivo.", points: 15, sound: "freni_aria.mp3.mp3" },
-            { id: 5, name: "Sospensioni/Barra", facts: "Rumore secco su buche.", correct: "Segnala a fine turno", feedback: "Usura gommini barra stabilizzatrice.", points: 5, sound: "barra_stabilizzatrice.mp3.mp3" },
-            { id: 6, name: "Scatola Sterzo", facts: "Gioco volante eccessivo.", correct: "Fermo immediato", feedback: "Rischio perdita controllo sterzo.", points: 20, sound: "scatola_sterzo.mp3.mp3" },
-            { id: 7, name: "Refrigerante", facts: "Livello minimo acqua.", correct: "Fermo immediato", feedback: "Rischio surriscaldamento testata.", points: 20, sound: "freni_aria.mp3.mp3" },
-            { id: 8, name: "Porte", facts: "Porta rimbalza, ostacolo rimosso.", correct: "Proseguire", feedback: "Errore temporaneo sensore risolto.", points: 5, sound: "bus_generico.wav.wav" },
-            { id: 9, name: "Freni", facts: "Fischio stridente in frenata.", correct: "Segnala a fine turno", feedback: "Usura pastiglie, non critico.", points: 5, sound: "freni_fischio.wav.wav" },
-            { id: 10, name: "Cinghia Servizi", facts: "Spia batteria rossa, fischio acuto.", correct: "Fermo immediato", feedback: "Cinghia rotta: rischio perdita sterzo/pompa acqua.", points: 20, sound: "cinghia_slitta.mp3.mp3" }
+            { id: 1, name: "Pressione Olio", facts: "Spia rossa, rumore metallico in galleria.", correct: "Fermo immediato", feedback: "Pressione olio 0: Rischio distruzione motore.", points: 20, sound: "motore_rotto.mp3.mp3" },
+            { id: 5, name: "Sospensioni/Barra", facts: "Rumore secco su buche.", correct: "Segnala a fine turno", feedback: "Usura gommini.", points: 5, sound: "barra_stabilizzatrice.mp3.mp3" },
+            { id: 6, name: "Scatola Sterzo", facts: "Gioco volante eccessivo.", correct: "Fermo immediato", feedback: "Rischio sterzo.", points: 20, sound: "scatola_sterzo.mp3.mp3" },
+            { id: 7, name: "Refrigerante", facts: "Livello minimo acqua.", correct: "Fermo immediato", feedback: "Surriscaldamento.", points: 20, sound: "freni_aria.mp3.mp3" },
+            { id: 9, name: "Freni", facts: "Fischio stridente in frenata.", correct: "Segnala a fine turno", feedback: "Usura pastiglie.", points: 5, sound: "freni_fischio.wav.wav" },
+            { id: 10, name: "Cinghia Servizi", facts: "Spia batteria rossa, fischio acuto.", correct: "Fermo immediato", feedback: "Cinghia rotta.", points: 20, sound: "cinghia_slitta.mp3.mp3" }
         ];
 
-        let index = 0, score = 0, results = [];
-        let currentScenarios = [...scenarios].sort(() => Math.random() - 0.5);
-
-        function render() {
-            if(index >= currentScenarios.length) {
-                let html = `<h2 class="text-2xl font-bold text-emerald-400">Valutazione Completata</h2>`;
-                html += `<p class="mt-4">Punteggio Totale: ${score}/${scenarios.reduce((a,b)=>a+b.points,0)}</p><ul class="mt-4 space-y-2">`;
-                results.forEach(r => html += `<li class="p-2 bg-slate-800 rounded text-xs ${r.ok ? 'border-l-4 border-emerald-500' : 'border-l-4 border-red-500'}">${r.name}: ${r.feedback}</li>`);
-                html += `</ul><button onclick="location.reload()" class="mt-6 w-full bg-emerald-600 py-3 rounded">Nuovo Test</button>`;
-                document.getElementById('game-ui').innerHTML = html;
-                return;
-            }
-            const s = currentScenarios[index];
-            document.getElementById('scenario-title').innerText = s.name;
-            document.getElementById('scenario-facts').innerText = s.facts;
-            const container = document.getElementById('options');
-            let opts = ["Fermo immediato", "Assistenza", "Segnala a fine turno", "Proseguire", "Reset Bus Sleep"].sort(() => Math.random() - 0.5);
-            container.innerHTML = opts.map(o => `<button onclick="check('${o}')" class="p-3 bg-slate-800 hover:bg-slate-700 rounded border border-slate-600">${o}</button>`).join('');
-        }
-
-        function check(choice) {
-            const s = currentScenarios[index];
-            const ok = choice === s.correct;
-            if(ok) score += s.points;
-            results.push({ name: s.name, ok, feedback: s.feedback });
-            index++;
-            render();
-        }
+        let index = 0;
+        const audioPlayer = document.getElementById('audio-player');
+        const debugPanel = document.getElementById('debug-panel');
 
         function playScenarioSound() {
-            const audio = document.getElementById('audio-player');
-            audio.src = currentScenarios[index].sound;
-            audio.play().catch(e => console.error("Audio non trovato:", e));
+            const fileName = scenarios[index].sound;
+            debugPanel.innerText = "Tentativo di caricamento: " + fileName;
+            
+            audioPlayer.src = fileName;
+            audioPlayer.play()
+                .then(() => {
+                    debugPanel.innerText = "Riproduzione in corso: " + fileName;
+                    debugPanel.classList.add("text-emerald-400");
+                })
+                .catch(e => {
+                    debugPanel.innerText = "ERRORE: " + e.message + ". Verifica che il file " + fileName + " sia esattamente nella cartella principale.";
+                    debugPanel.classList.add("text-red-400");
+                });
         }
 
-        new QRCode(document.getElementById("qr-area"), window.location.href);
+        function render() {
+            const s = scenarios[index];
+            document.getElementById('scenario-title').innerText = s.name;
+            document.getElementById('scenario-facts').innerText = s.facts;
+            document.getElementById('options').innerHTML = ["Fermo immediato", "Assistenza", "Segnala a fine turno"].map(o => 
+                `<button onclick="alert('Opzione selezionata')" class="p-3 bg-slate-800 hover:bg-slate-700 rounded border border-slate-600">${o}</button>`).join('');
+        }
+
         render();
     </script>
 </body>
 </html>
+```eof
