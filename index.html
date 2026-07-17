@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>Citaro PRO Training Suite V4</title>
+    <title>Citaro PRO - Assessment FORDEC</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8">
@@ -15,7 +15,7 @@
                 <div id="options" class="grid gap-3"></div>
             </div>
             <div id="result-view" class="hidden">
-                <h2 class="text-2xl font-bold text-emerald-400 mb-4">Certificazione FORDEC</h2>
+                <h2 class="text-2xl font-bold text-emerald-400 mb-4">Certificazione FORDEC Completata</h2>
                 <div id="final-stats"></div>
                 <button onclick="location.reload()" class="mt-6 w-full bg-emerald-600 py-3 rounded font-bold hover:bg-emerald-500">Ricomincia Test</button>
             </div>
@@ -24,18 +24,19 @@
 
     <script>
         const scenarios = [
-            { id: 1, name: "Pressione Olio", facts: "Spia rossa motore accesa.", correct: "Fermo", feedback: "F: Pressione 0. D: Fermo immediato.", sound: "motore_rotto.mp3.mp3" },
-            { id: 2, name: "Cinghia Servizi", facts: "Fischio acuto, spia batteria.", correct: "Fermo", feedback: "F: Rischio pompa acqua. D: Fermo immediato.", sound: "cinghia_slitta.mp3.mp3" },
-            { id: 3, name: "Scatola Sterzo", facts: "Gioco volante eccessivo.", correct: "Fermo", feedback: "F: Rischio perdita sterzo. D: Fermo immediato.", sound: "scatola_sterzo.mp3.mp3" },
-            { id: 4, name: "Freni (Usura)", facts: "Fischio stridente in frenata.", correct: "Segnala", feedback: "F: Pastiglie usurate. D: Segnala fine turno.", sound: "freni_fischio.wav.wav" },
-            { id: 5, name: "Freni (Sfiato)", facts: "Sifilo d'aria continuo.", correct: "Assistenza", feedback: "F: Perdita pneumatica. D: Assistenza.", sound: "freni_aria.mp3.mp3" },
-            { id: 6, name: "Porta Bloccata", facts: "Porta passeggeri non chiude.", correct: "Assistenza", feedback: "F: Ostacolo/Sensore. D: Assistenza.", sound: "bus_generico.wav.wav" },
-            { id: 7, name: "Pedana Disabili", facts: "Pedana non rientra.", correct: "Assistenza", feedback: "F: Blocco meccanico. D: Assistenza.", sound: "bus_generico.wav.wav" },
-            { id: 8, name: "Filtro Abitacolo", facts: "Odore di muffa.", correct: "Segnala", feedback: "F: Comfort. D: Segnala fine turno.", sound: null }
+            { name: "Pressione Olio", facts: "Spia rossa, rumore metallico.", correct: "Fermo", feedback: "Pressione 0: rischio grippaggio motore.", sound: "motore_rotto.mp3.mp3" },
+            { name: "Cinghia Servizi", facts: "Fischio acuto, spia batteria.", correct: "Fermo", feedback: "Rischio perdita sterzo/pompa acqua.", sound: "cinghia_slitta.mp3.mp3" },
+            { name: "Scatola Sterzo", facts: "Gioco volante eccessivo.", correct: "Fermo", feedback: "Rischio perdita controllo sterzo.", sound: "scatola_sterzo.mp3.mp3" },
+            { name: "Freni (Usura)", facts: "Fischio stridente in frenata.", correct: "Segnala", feedback: "Pastiglie usurate, non critico.", sound: "freni_fischio.wav.wav" },
+            { name: "Freni (Sfiato)", facts: "Sifilo d'aria continuo.", correct: "Assistenza", feedback: "Perdita circuito pneumatico.", sound: "freni_aria.mp3.mp3" },
+            { name: "Porta Bloccata", facts: "Porta passeggeri non chiude.", correct: "Assistenza", feedback: "Ostacolo o sensore.", sound: "bus_generico.wav.wav" },
+            { name: "Tergicristallo", facts: "Spazzola lato guida che salta.", correct: "Segnala", feedback: "Visibilità ridotta: intervento fine turno.", sound: null },
+            { name: "Liquido Lavavetri", facts: "Spia livello basso accesa.", correct: "Segnala", feedback: "Rabbocco necessario.", sound: null },
+            { name: "Climatizzatore", facts: "Comfort ridotto, aria calda.", correct: "Segnala", feedback: "Anomalia comfort: servizio garantito.", sound: null },
+            { name: "Filtro Abitacolo", facts: "Odore di muffa in abitacolo.", correct: "Segnala", feedback: "Sanificazione necessaria.", sound: null }
         ];
 
         let index = 0, score = 0, results = [];
-        // Unico lettore globale per tutto il ciclo di vita del test
         let player = new Audio();
 
         function playScenarioSound(fileName) {
@@ -45,33 +46,28 @@
             player.play();
         }
 
-        function stopAudio() {
+        function render() {
+            if (index >= scenarios.length) { showResults(); return; }
+            
             player.pause();
             player.currentTime = 0;
-        }
-
-        function render() {
-            if (index >= scenarios.length) {
-                showResults();
-                return;
-            }
+            
             const s = scenarios[index];
             document.getElementById('scenario-title').innerText = `Scenario ${index + 1}: ${s.name}`;
             document.getElementById('scenario-facts').innerText = s.facts;
 
             const audioContainer = document.getElementById('audio-container');
-            if (s.sound) {
-                audioContainer.innerHTML = `<button onclick="playScenarioSound('${s.sound}')" class="bg-emerald-900 px-4 py-2 rounded border border-emerald-500 text-emerald-300 text-sm hover:bg-emerald-800">🔊 Ascolta Segnale</button>`;
-            } else {
-                audioContainer.innerHTML = `<p class="text-xs text-slate-600 italic">Nessun segnale acustico diagnostico.</p>`;
-            }
+            audioContainer.innerHTML = s.sound ? 
+                `<button onclick="playScenarioSound('${s.sound}')" class="bg-emerald-900 px-4 py-2 rounded border border-emerald-500 text-emerald-300 text-sm hover:bg-emerald-800">🔊 Ascolta Segnale</button>` 
+                : `<p class="text-xs text-slate-600 italic">Nessun segnale acustico diagnostico.</p>`;
 
             document.getElementById('options').innerHTML = ["Fermo", "Assistenza", "Segnala"].map(o => 
                 `<button onclick="submit('${o}')" class="p-3 bg-slate-800 hover:bg-slate-700 rounded border border-slate-600 transition">${o}</button>`).join('');
         }
 
         function submit(choice) {
-            stopAudio(); // Ferma l'audio appena clicchi una risposta
+            player.pause();
+            player.currentTime = 0;
             const s = scenarios[index];
             const isCorrect = choice === s.correct;
             if(isCorrect) score += 1;
@@ -83,7 +79,7 @@
         function showResults() {
             document.getElementById('test-content').classList.add('hidden');
             document.getElementById('result-view').classList.remove('hidden');
-            let html = `<p class="mb-4 font-bold text-lg">Punteggio Finale: ${score}/${scenarios.length}</p><ul class="space-y-3">`;
+            let html = `<p class="mb-4 font-bold text-lg">Punteggio Totale: ${score}/${scenarios.length}</p><ul class="space-y-3">`;
             results.forEach(r => {
                 html += `<li class="p-3 rounded border-l-4 ${r.ok ? 'bg-emerald-900/30 border-emerald-500' : 'bg-red-900/30 border-red-500'}">
                     <span class="font-bold">${r.name}</span><br><span class="text-xs">${r.feedback}</span>
