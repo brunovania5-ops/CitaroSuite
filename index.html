@@ -7,16 +7,6 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8">
     <div class="max-w-4xl mx-auto">
-        <!-- QR Code Header -->
-        <div class="flex justify-between items-center mb-6 bg-slate-900 p-4 rounded-xl border border-slate-700">
-            <div>
-                <h2 class="text-lg font-bold text-white">Accesso Rapido (QR)</h2>
-                <p class="text-xs text-slate-400">Inquadra per il test sul tuo dispositivo</p>
-            </div>
-            <!-- Generazione QR tramite Google Charts API -->
-            <img id="qr-img" src="" alt="QR Code" class="bg-white p-1 rounded w-20 h-20">
-        </div>
-
         <div id="game-ui" class="bg-slate-900 p-6 rounded-2xl border border-slate-700 shadow-2xl">
             <div id="test-content">
                 <h2 id="scenario-title" class="text-xl font-bold mb-2">Caricamento...</h2>
@@ -31,76 +21,34 @@
             </div>
         </div>
     </div>
-
     <script>
-        // Genera il QR Code puntando all'URL della pagina corrente
-        const currentUrl = window.location.href;
-        document.getElementById("qr-img").src = "https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=" + encodeURIComponent(currentUrl);
-
         const scenarios = [
-            { name: "Pressione Olio", facts: "Spia rossa, rumore metallico.", correct: "Fermo", feedback: "Pressione 0: Rischio distruzione motore immediato.", sound: "motore_rotto.mp3.mp3" },
-            { name: "Cinghia Servizi", facts: "Fischio acuto, spia batteria.", correct: "Fermo", feedback: "Rischio perdita servosterzo e pompa acqua.", sound: "cinghia_slitta.mp3.mp3" },
-            { name: "Scatola Sterzo", facts: "Gioco volante eccessivo.", correct: "Fermo", feedback: "Perdita di controllo sterzo. Arresto immediato.", sound: "scatola_sterzo.mp3.mp3" },
-            { name: "Freni (Usura)", facts: "Fischio stridente in frenata.", correct: "Segnala", feedback: "Usura pastiglie: non critico, segnala fine turno.", sound: "freni_fischio.wav.wav" },
+            { name: "Pressione Olio", facts: "Spia rossa, rumore metallico.", correct: "Fermo", feedback: "Pressione 0: Rischio distruzione motore immediato. FORDEC richiede arresto in sicurezza.", sound: "motore_rotto.mp3.mp3" },
+            { name: "Cinghia Servizi", facts: "Fischio acuto, spia batteria.", correct: "Fermo", feedback: "Cinghia rotta: rischio perdita servosterzo e pompa acqua. Fermo obbligatorio.", sound: "cinghia_slitta.mp3.mp3" },
+            { name: "Scatola Sterzo", facts: "Gioco volante eccessivo.", correct: "Fermo", feedback: "Perdita di controllo sterzo. FORDEC: Arresto immediato per sicurezza.", sound: "scatola_sterzo.mp3.mp3" },
+            { name: "Freni (Usura)", facts: "Fischio stridente in frenata.", correct: "Segnala", feedback: "Usura pastiglie: anomalia gestibile fino a fine turno. Non bloccare la linea.", sound: "freni_fischio.wav.wav" },
             { name: "Freni (Sfiato)", facts: "Sifilo d'aria continuo.", correct: "Assistenza", feedback: "Perdita pneumatica: assistenza tecnica richiesta.", sound: "freni_aria.mp3.mp3" },
-            { name: "Porta Bloccata", facts: "Porta passeggeri non chiude.", correct: "Assistenza", feedback: "Blocco porta: impedisce ripartenza.", sound: "bus_generico.wav.wav" },
+            { name: "Porta Bloccata", facts: "Porta passeggeri non chiude.", correct: "Assistenza", feedback: "Blocco porta: impedisce ripartenza. Assistenza tecnica richiesta.", sound: "bus_generico.wav.wav" },
             { name: "Tergicristallo", facts: "Spazzola lato guida che salta.", correct: "Segnala", feedback: "Visibilità ridotta: intervento fine turno.", sound: null },
             { name: "Liquido Lavavetri", facts: "Spia livello basso accesa.", correct: "Segnala", feedback: "Rabbocco necessario.", sound: null },
             { name: "Climatizzatore", facts: "Comfort ridotto, aria calda.", correct: "Segnala", feedback: "Anomalia comfort: servizio garantito.", sound: null },
             { name: "Filtro Abitacolo", facts: "Odore di muffa in abitacolo.", correct: "Segnala", feedback: "Sanificazione necessaria.", sound: null }
         ];
-
         let index = 0, score = 0, results = [];
         let player = new Audio();
-
-        function playScenarioSound(fileName) {
-            player.pause(); player.currentTime = 0;
-            player.src = fileName; player.play();
-        }
-
+        function playScenarioSound(fileName) { player.pause(); player.currentTime = 0; player.src = fileName; player.play(); }
         function render() {
             if (index >= scenarios.length) { showResults(); return; }
             player.pause(); player.currentTime = 0;
             const s = scenarios[index];
             document.getElementById('scenario-title').innerText = `Scenario ${index + 1}: ${s.name}`;
             document.getElementById('scenario-facts').innerText = s.facts;
-
             const audioContainer = document.getElementById('audio-container');
-            audioContainer.innerHTML = s.sound ? 
-                `<button onclick="playScenarioSound('${s.sound}')" class="bg-emerald-900 px-4 py-2 rounded border border-emerald-500 text-emerald-300 text-sm hover:bg-emerald-800">🔊 Ascolta Segnale</button>` 
-                : `<p class="text-xs text-slate-600 italic">Nessun segnale acustico diagnostico.</p>`;
-
-            document.getElementById('options').innerHTML = ["Fermo", "Assistenza", "Segnala"].map(o => 
-                `<button onclick="submit('${o}')" class="p-3 bg-slate-800 hover:bg-slate-700 rounded border border-slate-600 transition">${o}</button>`).join('');
+            audioContainer.innerHTML = s.sound ? `<button onclick="playScenarioSound('${s.sound}')" class="bg-emerald-900 px-4 py-2 rounded border border-emerald-500 text-emerald-300 text-sm hover:bg-emerald-800">🔊 Ascolta Segnale</button>` : `<p class="text-xs text-slate-600 italic">Nessun segnale acustico diagnostico.</p>`;
+            document.getElementById('options').innerHTML = ["Fermo", "Assistenza", "Segnala"].map(o => `<button onclick="submit('${o}')" class="p-3 bg-slate-800 hover:bg-slate-700 rounded border border-slate-600 transition">${o}</button>`).join('');
         }
-
-        function submit(choice) {
-            player.pause(); player.currentTime = 0;
-            const s = scenarios[index];
-            const isCorrect = choice === s.correct;
-            if(isCorrect) score += 1;
-            results.push({ name: s.name, choice: choice, correct: s.correct, feedback: s.feedback, ok: isCorrect });
-            index++;
-            render();
-        }
-
-        function showResults() {
-            document.getElementById('test-content').classList.add('hidden');
-            document.getElementById('result-view').classList.remove('hidden');
-            let html = `<p class="mb-4 font-bold text-lg">Punteggio Totale: ${score}/${scenarios.length}</p><ul class="space-y-4">`;
-            results.forEach(r => {
-                html += `<li class="p-4 rounded border-l-4 ${r.ok ? 'bg-emerald-900/30 border-emerald-500' : 'bg-red-900/30 border-red-500'}">
-                    <div class="font-bold">${r.name}</div>
-                    <div class="text-sm mt-2 opacity-90">
-                        ${r.ok ? '<span class="text-emerald-300">✅ Scelta corretta.</span>' : 
-                          `<span class="text-red-300">❌ Scelta errata: hai selezionato "${r.choice}".</span><br>
-                           <span class="text-emerald-300 font-bold">PROCEDURA CORRETTA: ${r.correct}</span><br>
-                           <span class="text-slate-300 italic">Analisi FORDEC: ${r.feedback}</span>`}
-                    </div>
-                </li>`;
-            });
-            document.getElementById('final-stats').innerHTML = html + "</ul>";
-        }
+        function submit(choice) { player.pause(); player.currentTime = 0; const s = scenarios[index]; const isCorrect = choice === s.correct; if(isCorrect) score += 1; results.push({ name: s.name, choice: choice, correct: s.correct, feedback: s.feedback, ok: isCorrect }); index++; render(); }
+        function showResults() { document.getElementById('test-content').classList.add('hidden'); document.getElementById('result-view').classList.remove('hidden'); let html = `<p class="mb-4 font-bold text-lg">Punteggio Totale: ${score}/${scenarios.length}</p><ul class="space-y-4">`; results.forEach(r => { html += `<li class="p-4 rounded border-l-4 ${r.ok ? 'bg-emerald-900/30 border-emerald-500' : 'bg-red-900/30 border-red-500'}"><div class="font-bold">${r.name}</div><div class="text-sm mt-2 opacity-90">${r.ok ? '<span class="text-emerald-300">✅ Scelta corretta.</span>' : `<span class="text-red-300">❌ Scelta errata: hai selezionato "${r.choice}".</span><br><span class="text-emerald-300 font-bold">PROCEDURA CORRETTA: ${r.correct}</span><br><span class="text-slate-300 italic">Analisi FORDEC: ${r.feedback}</span>`}</div></li>`; }); document.getElementById('final-stats').innerHTML = html + "</ul>"; }
         render();
     </script>
 </body>
