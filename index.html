@@ -2,26 +2,21 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>Citaro PRO - Assessment FORDEC</title>
+    <title>Citaro PRO Training Suite V4</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8">
-    <div class="max-w-4xl mx-auto" id="app">
-        <header class="mb-8 border-b border-slate-800 pb-4">
-            <h1 class="text-2xl font-bold text-emerald-400">Valutazione FORDEC - Citaro PRO</h1>
-        </header>
-
+    <div class="max-w-4xl mx-auto">
         <div id="game-ui" class="bg-slate-900 p-6 rounded-2xl border border-slate-700 shadow-2xl">
             <div id="test-content">
                 <h2 id="scenario-title" class="text-xl font-bold mb-2">Caricamento...</h2>
                 <p id="scenario-facts" class="text-slate-300 mb-6 text-sm"></p>
-                <div id="audio-container" class="mb-6 min-h-[50px]"></div>
+                <div id="audio-container" class="mb-6 h-12"></div>
                 <div id="options" class="grid gap-3"></div>
             </div>
-            
             <div id="result-view" class="hidden">
                 <h2 class="text-2xl font-bold text-emerald-400 mb-4">Certificazione FORDEC</h2>
-                <div id="final-stats" class="space-y-4"></div>
+                <div id="final-stats"></div>
                 <button onclick="location.reload()" class="mt-6 w-full bg-emerald-600 py-3 rounded font-bold hover:bg-emerald-500">Ricomincia Test</button>
             </div>
         </div>
@@ -34,16 +29,21 @@
             { id: 3, name: "Scatola Sterzo", facts: "Gioco volante eccessivo.", correct: "Fermo", feedback: "F: Rischio perdita sterzo. D: Fermo immediato.", sound: "scatola_sterzo.mp3.mp3" },
             { id: 4, name: "Freni (Usura)", facts: "Fischio stridente in frenata.", correct: "Segnala", feedback: "F: Pastiglie usurate. D: Segnala fine turno.", sound: "freni_fischio.wav.wav" },
             { id: 5, name: "Freni (Sfiato)", facts: "Sifilo d'aria continuo.", correct: "Assistenza", feedback: "F: Perdita pneumatica. D: Assistenza.", sound: "freni_aria.mp3.mp3" },
-            { id: 6, name: "Pedana Disabili", facts: "Pedana bloccata, passeggero a bordo.", correct: "Assistenza", feedback: "F: Pedana non rientra. D: Assistenza.", sound: null },
-            { id: 7, name: "Filtro Abitacolo", facts: "Odore muffa, comfort ridotto.", correct: "Segnala", feedback: "F: Comfort. D: Segnala fine turno.", sound: null }
+            { id: 6, name: "Porta Bloccata", facts: "Porta passeggeri non chiude.", correct: "Assistenza", feedback: "F: Ostacolo/Sensore. D: Assistenza.", sound: "bus_generico.wav.wav" },
+            { id: 7, name: "Pedana Disabili", facts: "Pedana non rientra.", correct: "Assistenza", feedback: "F: Blocco meccanico. D: Assistenza.", sound: "bus_generico.wav.wav" },
+            { id: 8, name: "Filtro Abitacolo", facts: "Odore di muffa.", correct: "Segnala", feedback: "F: Comfort. D: Segnala fine turno.", sound: null }
         ];
 
         let index = 0, score = 0, results = [];
-        const audioPlayer = new Audio();
+        let activeAudio = null;
 
         function playScenarioSound(fileName) {
-            audioPlayer.src = fileName;
-            audioPlayer.play();
+            if (activeAudio) {
+                activeAudio.pause();
+                activeAudio.currentTime = 0;
+            }
+            activeAudio = new Audio(fileName);
+            activeAudio.play();
         }
 
         function render() {
@@ -58,17 +58,18 @@
             const audioContainer = document.getElementById('audio-container');
             audioContainer.innerHTML = s.sound ? 
                 `<button onclick="playScenarioSound('${s.sound}')" class="bg-emerald-900 px-4 py-2 rounded border border-emerald-500 text-emerald-300 text-sm hover:bg-emerald-800">🔊 Ascolta Segnale</button>` 
-                : `<p class="text-xs text-slate-600 italic">Nessun segnale acustico per questo scenario.</p>`;
+                : `<p class="text-xs text-slate-600 italic">Nessun segnale acustico diagnostico.</p>`;
 
             document.getElementById('options').innerHTML = ["Fermo", "Assistenza", "Segnala"].map(o => 
                 `<button onclick="submit('${o}')" class="p-3 bg-slate-800 hover:bg-slate-700 rounded border border-slate-600 transition">${o}</button>`).join('');
         }
 
         function submit(choice) {
+            if (activeAudio) { activeAudio.pause(); activeAudio.currentTime = 0; }
             const s = scenarios[index];
             const isCorrect = choice === s.correct;
             if(isCorrect) score += 1;
-            results.push({ name: s.name, choice, correct: s.correct, feedback: s.feedback, ok: isCorrect });
+            results.push({ name: s.name, feedback: s.feedback, ok: isCorrect });
             index++;
             render();
         }
@@ -76,7 +77,7 @@
         function showResults() {
             document.getElementById('test-content').classList.add('hidden');
             document.getElementById('result-view').classList.remove('hidden');
-            let html = `<p class="mb-4 font-bold text-lg">Punteggio: ${score}/${scenarios.length}</p><ul class="space-y-3">`;
+            let html = `<p class="mb-4 font-bold text-lg">Punteggio Totale: ${score}/${scenarios.length}</p><ul class="space-y-3">`;
             results.forEach(r => {
                 html += `<li class="p-3 rounded border-l-4 ${r.ok ? 'bg-emerald-900/30 border-emerald-500' : 'bg-red-900/30 border-red-500'}">
                     <span class="font-bold">${r.name}</span><br><span class="text-xs">${r.feedback}</span>
@@ -84,14 +85,7 @@
             });
             document.getElementById('final-stats').innerHTML = html + "</ul>";
         }
-
         render();
     </script>
 </body>
 </html>
-```eof
-
-### Cosa fare ora:
-1. **Carica il file:** Sostituisci il contenuto del tuo `index.html` su GitHub.
-2. **Testa il percorso:** Clicca le risposte e osserva come il sistema avanza correttamente verso il report finale.
-3. **Verifica il report:** A fine test avrai una schermata riassuntiva. Se il punteggio o la conformità FORDEC non ti soddisfano in uno scenario, dimmi pure: *"Nello scenario Pressione Olio, la risposta corretta deve essere X"* e lo sistemeremo all'istante.
