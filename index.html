@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>Citaro PRO - Assessment FORDEC</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8">
     <div class="max-w-4xl mx-auto">
@@ -12,9 +11,10 @@
         <div class="flex justify-between items-center mb-6 bg-slate-900 p-4 rounded-xl border border-slate-700">
             <div>
                 <h2 class="text-lg font-bold text-white">Accesso Rapido (QR)</h2>
-                <p class="text-xs text-slate-400">Scansiona per avviare il test sul tuo dispositivo</p>
+                <p class="text-xs text-slate-400">Inquadra per il test sul tuo dispositivo</p>
             </div>
-            <div id="qrcode" class="bg-white p-1 rounded"></div>
+            <!-- Generazione QR tramite Google Charts API -->
+            <img id="qr-img" src="" alt="QR Code" class="bg-white p-1 rounded w-20 h-20">
         </div>
 
         <div id="game-ui" class="bg-slate-900 p-6 rounded-2xl border border-slate-700 shadow-2xl">
@@ -33,16 +33,17 @@
     </div>
 
     <script>
-        // Generazione automatica QR Code
-        new QRCode(document.getElementById("qrcode"), window.location.href);
+        // Genera il QR Code puntando all'URL della pagina corrente
+        const currentUrl = window.location.href;
+        document.getElementById("qr-img").src = "https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=" + encodeURIComponent(currentUrl);
 
         const scenarios = [
-            { name: "Pressione Olio", facts: "Spia rossa, rumore metallico.", correct: "Fermo", feedback: "Pressione 0: Rischio distruzione motore immediato. FORDEC richiede arresto in sicurezza.", sound: "motore_rotto.mp3.mp3" },
-            { name: "Cinghia Servizi", facts: "Fischio acuto, spia batteria.", correct: "Fermo", feedback: "Cinghia rotta: rischio perdita servosterzo e pompa acqua. Fermo obbligatorio.", sound: "cinghia_slitta.mp3.mp3" },
-            { name: "Scatola Sterzo", facts: "Gioco volante eccessivo.", correct: "Fermo", feedback: "Perdita di controllo sterzo. FORDEC: Arresto immediato per sicurezza.", sound: "scatola_sterzo.mp3.mp3" },
-            { name: "Freni (Usura)", facts: "Fischio stridente in frenata.", correct: "Segnala", feedback: "Usura pastiglie: anomalia gestibile fino a fine turno. Non bloccare la linea.", sound: "freni_fischio.wav.wav" },
-            { name: "Freni (Sfiato)", facts: "Sifilo d'aria continuo.", correct: "Assistenza", feedback: "Perdita pneumatica: necessita assistenza tecnica per ripristino pressione.", sound: "freni_aria.mp3.mp3" },
-            { name: "Porta Bloccata", facts: "Porta passeggeri non chiude.", correct: "Assistenza", feedback: "Blocco porta: impedisce ripartenza. Assistenza tecnica richiesta.", sound: "bus_generico.wav.wav" },
+            { name: "Pressione Olio", facts: "Spia rossa, rumore metallico.", correct: "Fermo", feedback: "Pressione 0: Rischio distruzione motore immediato.", sound: "motore_rotto.mp3.mp3" },
+            { name: "Cinghia Servizi", facts: "Fischio acuto, spia batteria.", correct: "Fermo", feedback: "Rischio perdita servosterzo e pompa acqua.", sound: "cinghia_slitta.mp3.mp3" },
+            { name: "Scatola Sterzo", facts: "Gioco volante eccessivo.", correct: "Fermo", feedback: "Perdita di controllo sterzo. Arresto immediato.", sound: "scatola_sterzo.mp3.mp3" },
+            { name: "Freni (Usura)", facts: "Fischio stridente in frenata.", correct: "Segnala", feedback: "Usura pastiglie: non critico, segnala fine turno.", sound: "freni_fischio.wav.wav" },
+            { name: "Freni (Sfiato)", facts: "Sifilo d'aria continuo.", correct: "Assistenza", feedback: "Perdita pneumatica: assistenza tecnica richiesta.", sound: "freni_aria.mp3.mp3" },
+            { name: "Porta Bloccata", facts: "Porta passeggeri non chiude.", correct: "Assistenza", feedback: "Blocco porta: impedisce ripartenza.", sound: "bus_generico.wav.wav" },
             { name: "Tergicristallo", facts: "Spazzola lato guida che salta.", correct: "Segnala", feedback: "Visibilità ridotta: intervento fine turno.", sound: null },
             { name: "Liquido Lavavetri", facts: "Spia livello basso accesa.", correct: "Segnala", feedback: "Rabbocco necessario.", sound: null },
             { name: "Climatizzatore", facts: "Comfort ridotto, aria calda.", correct: "Segnala", feedback: "Anomalia comfort: servizio garantito.", sound: null },
