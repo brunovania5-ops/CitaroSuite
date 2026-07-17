@@ -24,16 +24,16 @@
 
     <script>
         const scenarios = [
-            { name: "Pressione Olio", facts: "Spia rossa, rumore metallico.", correct: "Fermo", feedback: "Pressione 0: rischio grippaggio motore.", sound: "motore_rotto.mp3.mp3" },
-            { name: "Cinghia Servizi", facts: "Fischio acuto, spia batteria.", correct: "Fermo", feedback: "Rischio perdita sterzo/pompa acqua.", sound: "cinghia_slitta.mp3.mp3" },
-            { name: "Scatola Sterzo", facts: "Gioco volante eccessivo.", correct: "Fermo", feedback: "Rischio perdita controllo sterzo.", sound: "scatola_sterzo.mp3.mp3" },
-            { name: "Freni (Usura)", facts: "Fischio stridente in frenata.", correct: "Segnala", feedback: "Pastiglie usurate, non critico.", sound: "freni_fischio.wav.wav" },
-            { name: "Freni (Sfiato)", facts: "Sifilo d'aria continuo.", correct: "Assistenza", feedback: "Perdita circuito pneumatico.", sound: "freni_aria.mp3.mp3" },
-            { name: "Porta Bloccata", facts: "Porta passeggeri non chiude.", correct: "Assistenza", feedback: "Ostacolo o sensore.", sound: "bus_generico.wav.wav" },
-            { name: "Tergicristallo", facts: "Spazzola lato guida che salta.", correct: "Segnala", feedback: "Visibilità ridotta: intervento fine turno.", sound: null },
-            { name: "Liquido Lavavetri", facts: "Spia livello basso accesa.", correct: "Segnala", feedback: "Rabbocco necessario.", sound: null },
-            { name: "Climatizzatore", facts: "Comfort ridotto, aria calda.", correct: "Segnala", feedback: "Anomalia comfort: servizio garantito.", sound: null },
-            { name: "Filtro Abitacolo", facts: "Odore di muffa in abitacolo.", correct: "Segnala", feedback: "Sanificazione necessaria.", sound: null }
+            { name: "Pressione Olio", facts: "Spia rossa, rumore metallico.", correct: "Fermo", feedback: "Pressione 0: Rischio distruzione motore immediato. FORDEC richiede arresto in sicurezza.", sound: "motore_rotto.mp3.mp3" },
+            { name: "Cinghia Servizi", facts: "Fischio acuto, spia batteria.", correct: "Fermo", feedback: "Cinghia rotta: rischio perdita servosterzo e pompa acqua. Fermo obbligatorio.", sound: "cinghia_slitta.mp3.mp3" },
+            { name: "Scatola Sterzo", facts: "Gioco volante eccessivo.", correct: "Fermo", feedback: "Perdita di controllo sterzo. FORDEC: Arresto immediato per sicurezza.", sound: "scatola_sterzo.mp3.mp3" },
+            { name: "Freni (Usura)", facts: "Fischio stridente in frenata.", correct: "Segnala", feedback: "Usura pastiglie: anomalia gestibile fino a fine turno. Non bloccare la linea.", sound: "freni_fischio.wav.wav" },
+            { name: "Freni (Sfiato)", facts: "Sifilo d'aria continuo.", correct: "Assistenza", feedback: "Perdita pneumatica: necessita assistenza tecnica per ripristino pressione.", sound: "freni_aria.mp3.mp3" },
+            { name: "Porta Bloccata", facts: "Porta passeggeri non chiude.", correct: "Assistenza", feedback: "Blocco porta: impedisce ripartenza. Assistenza tecnica richiesta.", sound: "bus_generico.wav.wav" },
+            { name: "Tergicristallo", facts: "Spazzola lato guida che salta.", correct: "Segnala", feedback: "Visibilità ridotta: anomalia di comfort/sicurezza minore. Segnala a fine turno.", sound: null },
+            { name: "Liquido Lavavetri", facts: "Spia livello basso accesa.", correct: "Segnala", feedback: "Rabbocco ordinario: non pregiudica la marcia.", sound: null },
+            { name: "Climatizzatore", facts: "Comfort ridotto, aria calda.", correct: "Segnala", feedback: "Comfort: anomalia che non impatta sulla sicurezza. Segnala a fine turno.", sound: null },
+            { name: "Filtro Abitacolo", facts: "Odore di muffa in abitacolo.", correct: "Segnala", feedback: "Igiene: anomalia secondaria. Segnala per sanificazione.", sound: null }
         ];
 
         let index = 0, score = 0, results = [];
@@ -77,10 +77,11 @@
             results.forEach(r => {
                 html += `<li class="p-4 rounded border-l-4 ${r.ok ? 'bg-emerald-900/30 border-emerald-500' : 'bg-red-900/30 border-red-500'}">
                     <div class="font-bold">${r.name}</div>
-                    <div class="text-xs mt-1">
-                        ${r.ok ? '' : `<span class="text-red-300">Scelta: ${r.choice}</span><br>`}
-                        <span class="text-emerald-300">Procedura Corretta: ${r.correct}</span><br>
-                        <span class="opacity-70">${r.feedback}</span>
+                    <div class="text-sm mt-2 opacity-90">
+                        ${r.ok ? '<span class="text-emerald-300">✅ Scelta corretta.</span>' : 
+                          `<span class="text-red-300">❌ Scelta errata: hai selezionato "${r.choice}".</span><br>
+                           <span class="text-emerald-300 font-bold">PROCEDURA CORRETTA: ${r.correct}</span><br>
+                           <span class="text-slate-300 italic">Analisi FORDEC: ${r.feedback}</span>`}
                     </div>
                 </li>`;
             });
