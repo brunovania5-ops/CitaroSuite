@@ -4,9 +4,19 @@
     <meta charset="UTF-8">
     <title>Citaro PRO - Assessment FORDEC</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8">
     <div class="max-w-4xl mx-auto">
+        <!-- QR Code Header -->
+        <div class="flex justify-between items-center mb-6 bg-slate-900 p-4 rounded-xl border border-slate-700">
+            <div>
+                <h2 class="text-lg font-bold text-white">Accesso Rapido (QR)</h2>
+                <p class="text-xs text-slate-400">Scansiona per avviare il test sul tuo dispositivo</p>
+            </div>
+            <div id="qrcode" class="bg-white p-1 rounded"></div>
+        </div>
+
         <div id="game-ui" class="bg-slate-900 p-6 rounded-2xl border border-slate-700 shadow-2xl">
             <div id="test-content">
                 <h2 id="scenario-title" class="text-xl font-bold mb-2">Caricamento...</h2>
@@ -23,6 +33,9 @@
     </div>
 
     <script>
+        // Generazione automatica QR Code
+        new QRCode(document.getElementById("qrcode"), window.location.href);
+
         const scenarios = [
             { name: "Pressione Olio", facts: "Spia rossa, rumore metallico.", correct: "Fermo", feedback: "Pressione 0: Rischio distruzione motore immediato. FORDEC richiede arresto in sicurezza.", sound: "motore_rotto.mp3.mp3" },
             { name: "Cinghia Servizi", facts: "Fischio acuto, spia batteria.", correct: "Fermo", feedback: "Cinghia rotta: rischio perdita servosterzo e pompa acqua. Fermo obbligatorio.", sound: "cinghia_slitta.mp3.mp3" },
@@ -30,10 +43,10 @@
             { name: "Freni (Usura)", facts: "Fischio stridente in frenata.", correct: "Segnala", feedback: "Usura pastiglie: anomalia gestibile fino a fine turno. Non bloccare la linea.", sound: "freni_fischio.wav.wav" },
             { name: "Freni (Sfiato)", facts: "Sifilo d'aria continuo.", correct: "Assistenza", feedback: "Perdita pneumatica: necessita assistenza tecnica per ripristino pressione.", sound: "freni_aria.mp3.mp3" },
             { name: "Porta Bloccata", facts: "Porta passeggeri non chiude.", correct: "Assistenza", feedback: "Blocco porta: impedisce ripartenza. Assistenza tecnica richiesta.", sound: "bus_generico.wav.wav" },
-            { name: "Tergicristallo", facts: "Spazzola lato guida che salta.", correct: "Segnala", feedback: "Visibilità ridotta: anomalia di comfort/sicurezza minore. Segnala a fine turno.", sound: null },
-            { name: "Liquido Lavavetri", facts: "Spia livello basso accesa.", correct: "Segnala", feedback: "Rabbocco ordinario: non pregiudica la marcia.", sound: null },
-            { name: "Climatizzatore", facts: "Comfort ridotto, aria calda.", correct: "Segnala", feedback: "Comfort: anomalia che non impatta sulla sicurezza. Segnala a fine turno.", sound: null },
-            { name: "Filtro Abitacolo", facts: "Odore di muffa in abitacolo.", correct: "Segnala", feedback: "Igiene: anomalia secondaria. Segnala per sanificazione.", sound: null }
+            { name: "Tergicristallo", facts: "Spazzola lato guida che salta.", correct: "Segnala", feedback: "Visibilità ridotta: intervento fine turno.", sound: null },
+            { name: "Liquido Lavavetri", facts: "Spia livello basso accesa.", correct: "Segnala", feedback: "Rabbocco necessario.", sound: null },
+            { name: "Climatizzatore", facts: "Comfort ridotto, aria calda.", correct: "Segnala", feedback: "Anomalia comfort: servizio garantito.", sound: null },
+            { name: "Filtro Abitacolo", facts: "Odore di muffa in abitacolo.", correct: "Segnala", feedback: "Sanificazione necessaria.", sound: null }
         ];
 
         let index = 0, score = 0, results = [];
